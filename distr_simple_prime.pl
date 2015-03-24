@@ -47,6 +47,21 @@ if( !defined($name_value{'vol1'}) ){
     die "Need at least one starting volume for prime exec!\n";   
 }
 
+# check so that queue is set (queue name)
+if(defined $name_value{'queue'}){
+}else{
+    die "queue=<grant|igbmc2015> need to be set\n";      
+}
+
+# set account name for the queue
+if( $name_value{'queue'} eq 'grant' ){
+    $name_value{'account'} = 'g2014a90';
+}elsif( $name_value{'queue'} eq 'igbmc2015' ){
+    $name_value{'account'} = 'qosigbmc2015';
+}else{
+    die "Unknown queue!\n";
+}
+
 # set the number of particles
 $name_value{'nptcls'} = exec_check_nptcls();
 
@@ -199,6 +214,9 @@ sub exec_prime_para{
         $prime_cmd_string = add2string($_, $prime_cmd_string);
     }   
     $prime_cmd_string =~ s/\s+$//; # removes trailing whitespace
+    $prime_cmd_string =~ s/queue\=//;
+    $prime_cmd_string =~ s/grant//;
+    $prime_cmd_string =~ s/igbmc2015//;
     print $prime_cmd_string, "\n";
     my $stop;
     my $start;
@@ -214,11 +232,9 @@ sub exec_prime_para{
         if ($ENV{SIMPLESYS} eq 'HPC'){
             print FHANDLE "#!/bin/bash
 #SBATCH -n $name_value{'nthr'}
-##SBATCH -N 1-1
-#SBATCH -J distr_simple
-#SBATCH -p grant
-#SBATCH -A g2014a90
-#SBATCH -t 4-00:00:00
+#SBATCH -J distr_simple_$i
+#SBATCH -p $name_value{'queue'}
+#SBATCH -A $name_value{'account'}
 cd $name_value{'execdir'} 
 $prime_cmd_string fromp=$start top=$stop part=$i outfile=algndoc_$i.txt > OUT$i\nexit\n";
         }elsif ($ENV{SIMPLESYS} eq 'DELPHI' ){
