@@ -26,11 +26,29 @@ foreach my $cmd (@ARGV){
     $name_value{$tmp[0]} = $tmp[1];
 }
 $cmd_string =~ s/\s+$//; # removes trailing whitespace
+$cmd_string =~ s/queue\=//;
+$cmd_string =~ s/grant//;
+$cmd_string =~ s/igbmc2015//;
 
 # check so that prg is set (program name)
 if(defined $name_value{'prg'}){
 }else{
     die "prg=<simple program name> need to be set\n";      
+}
+
+# check so that queue is set (queue name)
+if(defined $name_value{'queue'}){
+}else{
+    die "queue=<grant|igbmc2015> need to be set\n";      
+}
+
+# set account name for the queue
+if( $name_value{'queue'} eq 'grant' ){
+    $name_value{'account'} = 'g2014a90';
+}elsif( $name_value{'queue'} eq 'igbmc2015' ){
+    $name_value{'account'} = 'qosigbmc2015';
+}else{
+    die "Unknown queue!\n";
 }
 
 # set the check_nptcls program
@@ -91,11 +109,9 @@ for(my $i=1; $i<=$name_value{'npart'}; $i++){
     open(FHANDLE, ">script_$i");
     print FHANDLE "#!/bin/bash
 #SBATCH -n $name_value{'nthr'}
-##SBATCH -N 1-1  # we should run threads on one node
-#SBATCH -J distr_simple
-#SBATCH -p grant
-#SBATCH -A g2014a90
-#SBATCH -t 4-00:00:00
+#SBATCH -J distr_simple_$i
+#SBATCH -p $name_value{'queue'}
+#SBATCH -A $name_value{'account'}
 cd $execdir
 $name_value{'prg'} $cmd_string fromp=$start top=$stop part=$i outfile=algndoc_$i.txt > OUT$i\nexit\n";
     close(FHANDLE);
