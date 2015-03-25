@@ -1,5 +1,5 @@
 # Simple2.0
-Scripts adapted from http://simple.stanford.edu/ to run on HPC
+Scripts adapted from http://simple.stanford.edu/ to run on HPC with SLURM system
 
 ##### Example commands to run in parallel:
 
